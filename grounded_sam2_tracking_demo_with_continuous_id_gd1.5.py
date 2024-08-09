@@ -1,13 +1,19 @@
+# dds cloudapi for Grounding DINO 1.5
+from dds_cloudapi_sdk import Config
+from dds_cloudapi_sdk import Client
+from dds_cloudapi_sdk import DetectionTask
+from dds_cloudapi_sdk import TextPrompt
+from dds_cloudapi_sdk import DetectionModel
+from dds_cloudapi_sdk import DetectionTarget
+
+
 import os
-import cv2
 import torch
 import numpy as np
-import supervision as sv
 from PIL import Image
 from sam2.build_sam import build_sam2_video_predictor, build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection 
-from utils.track_utils import sample_points_from_masks
 from utils.video_utils import create_video_from_images
 from utils.common_utils import CommonUtils
 from utils.mask_dictionary_model import MaskDictionatyModel, ObjectInfo
@@ -87,26 +93,39 @@ for start_frame_idx in range(0, len(frame_names), step):
     image_base_name = frame_names[start_frame_idx].split(".")[0]
     mask_dict = MaskDictionatyModel(promote_type = PROMPT_TYPE_FOR_VIDEO, mask_name = f"mask_{image_base_name}.npy")
 
-    # run Grounding DINO on the image
-    inputs = processor(images=image, text=text, return_tensors="pt").to(device)
-    with torch.no_grad():
-        outputs = grounding_model(**inputs)
+    # run Grounding DINO 1.5 on the image
 
-    results = processor.post_process_grounded_object_detection(
-        outputs,
-        inputs.input_ids,
-        box_threshold=0.25,
-        text_threshold=0.25,
-        target_sizes=[image.size[::-1]]
+    API_TOKEN_FOR_GD1_5 = "Your API token"
+
+    config = Config(API_TOKEN_FOR_GD1_5)
+    # Step 2: initialize the client
+    client = Client(config)
+    
+    image_url = client.upload_file(img_path)
+    task = DetectionTask(
+        image_url=image_url,
+        prompts=[TextPrompt(text=text)],
+        targets=[DetectionTarget.BBox],  # detect bbox
+        model=DetectionModel.GDino1_6_Pro,  # detect with GroundingDino-1.5-Pro model
     )
+    client.run_task(task)
+    result = task.result
+
+    objects = result.objects  # the list of detected objects
+    input_boxes = []
+    confidences = []
+    class_names = []
+
+    for idx, obj in enumerate(objects):
+        input_boxes.append(obj.bbox)
+        confidences.append(obj.score)
+        class_names.append(obj.category)
+
+    input_boxes = np.array(input_boxes)
+    OBJECTS = class_names
 
     # prompt SAM image predictor to get the mask for the object
     image_predictor.set_image(np.array(image.convert("RGB")))
-
-    # process the detection results
-    input_boxes = results[0]["boxes"] # .cpu().numpy()
-    # print("results[0]",results[0])
-    OBJECTS = results[0]["labels"]
 
     # prompt SAM 2 image predictor to get the mask for the object
     masks, scores, logits = image_predictor.predict(
