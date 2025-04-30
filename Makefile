@@ -25,9 +25,14 @@ endif
 
 build-image:
 	@echo $(BUILD_MESSAGE)
-	docker build --build-arg USE_CUDA=$(USE_CUDA) \
+	docker build --no-cache --build-arg USE_CUDA=$(USE_CUDA) \
 	--build-arg TORCH_ARCH=$(TORCH_CUDA_ARCH_LIST) \
 	-t grounded_sam2:1.0 .
+
+build:
+	@echo $(BUILD_MESSAGE)
+	docker build --no-cache -t my_grounded_sam2:1.0 .
+
 run:
 	docker run --gpus all -it --rm --net=host --privileged \
 	-v /tmp/.X11-unix:/tmp/.X11-unix \

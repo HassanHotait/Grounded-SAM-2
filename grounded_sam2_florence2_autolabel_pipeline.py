@@ -42,7 +42,7 @@ Init Florence-2 and SAM 2 Model
 
 FLORENCE2_MODEL_ID = "microsoft/Florence-2-large"
 SAM2_CHECKPOINT = "./checkpoints/sam2_hiera_large.pt"
-SAM2_CONFIG = "sam2_hiera_l.yaml"
+SAM2_CONFIG = "sam2/configs/sam2/sam2_hiera_l.yaml"
 
 # environment settings
 # use bfloat16
@@ -167,8 +167,8 @@ def caption_phrase_grounding_and_segmentation(
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser("Grounded SAM 2 Florence-2 Demos", add_help=True)
-    parser.add_argument("--image_path", type=str, default="./notebooks/images/cars.jpg", required=True, help="path to image file")
-    parser.add_argument("--pipeline", type=str, default="caption_to_phrase_grounding", required=True, help="pipeline to use")
+    parser.add_argument("--image_path", type=str, default="COCO/000000001000.jpg", help="path to image file")
+    parser.add_argument("--pipeline", type=str, default="caption_to_phrase_grounding", help="pipeline to use")
     parser.add_argument("--caption_type", type=str, default="caption", required=False, help="granularity of caption")
     args = parser.parse_args()
 

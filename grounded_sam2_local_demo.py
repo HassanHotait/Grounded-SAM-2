@@ -14,8 +14,8 @@ from grounding_dino.groundingdino.util.inference import load_model, load_image, 
 """
 Hyper parameters
 """
-TEXT_PROMPT = "car. tire."
-IMG_PATH = "notebooks/images/truck.jpg"
+TEXT_PROMPT = "human."
+IMG_PATH = "COCO/000000001000.jpg"
 SAM2_CHECKPOINT = "./checkpoints/sam2.1_hiera_large.pt"
 SAM2_MODEL_CONFIG = "configs/sam2.1/sam2.1_hiera_l.yaml"
 GROUNDING_DINO_CONFIG = "grounding_dino/groundingdino/config/GroundingDINO_SwinT_OGC.py"

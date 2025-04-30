@@ -49,6 +49,9 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+model_store/*.mar
+models/*
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
